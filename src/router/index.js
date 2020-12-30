@@ -6,19 +6,26 @@ Vue.use(VueRouter)
 //路由懒加载
 const Login = () => import('@/views/login/Login')
 const Home = () => import('@/views/home/Home')
+const Welcome = () => import('@/components/Welcome')
+const Users = () => import('@/components/users/Users')
 
 const routes = [
-  {
-    path: '/',
-    redirect: '/login'
-  },
-  {
-    path: '/login',
-    component: Login
-  },
+  {path: '/',redirect: '/login'},
+  {path: '/login',component: Login},
   {
     path: '/home',
-    component: Home
+    component: Home,
+    redirect: '/welcome',
+    children: [
+      {
+        path: '/welcome',
+        component: Welcome
+      },
+      {
+        path: '/users',
+        component: Users
+      }
+    ]
   }
 ]
 

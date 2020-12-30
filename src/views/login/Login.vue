@@ -34,10 +34,13 @@
 
 
 <script>
+import {postLogin} from '@/network/login'
+
 export default {
   name: 'Login',
   data() {
     return {
+      //用户账户密码
       loginForm: {
         username:'admin',
         password: '123456',
@@ -66,10 +69,10 @@ export default {
     login() {
       this.$refs.loginFormRef.validate(valid => {
         if(!valid) return;
-        //axios发起登陆请求
-        this.$http.post('login',this.loginForm).then(result => {
-          const res = result.data;
-          console.log(res);
+        //axios请求
+        postLogin(this.loginForm).then(result => {
+          // console.log(result)
+          const res = result.data
           if(res.meta.status !== 200) return this.$message.error(res.meta.msg)
           this.$message.success('登陆成功')
           //将登陆成功之后的token，保存到客户端的sessionStorage中
