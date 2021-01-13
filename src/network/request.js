@@ -9,7 +9,6 @@ export function request(config) {
   //拦截器,添加tolen认证
   instance.interceptors.request.use(config => {
     config.headers.Authorization = window.sessionStorage.getItem('token')
-    console.log(config.headers.Authorization)
     return config
   })
 

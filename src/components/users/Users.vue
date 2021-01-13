@@ -58,7 +58,12 @@
               </el-button>
             </el-tooltip>
             <el-tooltip effect="dark" content="设置" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+              <el-button 
+                type="warning" 
+                icon="el-icon-setting" 
+                size="mini" 
+                @click="setRoles(scope.row)"
+              ></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -127,14 +132,43 @@
         <el-button type="primary" @click="changeUser">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 分配角色权限对话框 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="allotDialogVisible"
+      width="50%"
+      @close="allotClose"
+    >
+      <div>
+        <p>当前用户: {{userInfo.username}}</p>
+        <p>当前角色: {{userInfo.role_name}}</p>
+        <p>分配角色:
+          <el-select v-model="selectRolesId" placeholder="请选择">
+            <el-option
+              v-for="item in rolesList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="allotDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="allotRoles">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 
 <script>
 import 
-  { getHomeUser,putUserStatu,postAddUser,getQueryUser,putChangeUser,deleteUser}
+  { getHomeUser,putUserStatu,postAddUser,
+    getQueryUser,putChangeUser,deleteUser}
 from "@/network/home";
+import {getRoles,putAllotRoles} from '@/network/roles'
 
 export default {
   name: "User",
@@ -169,6 +203,12 @@ export default {
       total: 0,
       dialogVisible:false,
       changeDialog: false,
+      allotDialogVisible: false,
+      userInfo: '',
+      //角色列表
+      rolesList:'',
+      //选择器选中的角色id
+      selectRolesId: '',
       //表单用户数据
       addForm:{
         username:'',
@@ -227,7 +267,6 @@ export default {
     userStateChanged(userinfo) {
       putUserStatu(userinfo.id,userinfo.mg_state).then(result => {
         const res = result.data
-        console.log(res)
         if(res.meta.status !== 200) {
           userinfo.mg_state = !userinfo.mg_state
           this.$message.error(res.meta.msg)
@@ -304,6 +343,38 @@ export default {
       }).catch(() => {
         this.$message.info('已取消删除')
       })
+    },
+    //展示分配角色对话框
+    setRoles(user) {
+      this.userInfo = user
+      getRoles().then(result => {
+        const res = result.data
+        if(res.meta.status !== 200) {
+          this.$message.error('获取角色列表失败')
+        }
+        this.rolesList = res.data
+      })
+      this.allotDialogVisible = true
+    },
+    //点击按钮分配角色
+    allotRoles() {
+      if(!this.selectRolesId) {
+        return this.$message.error('请选择要分配的角色')
+      }
+      putAllotRoles(this.userInfo.id,this.selectRolesId).then(res => {
+        console.log(res)
+        if(res.data.meta.status !== 200) {
+          return this.$message.error('更新角色失败')
+        }
+        this.$message.success('更新角色成功')
+        this.getUserList()
+      })
+      this.allotDialogVisible = false
+    },
+    //关闭分配角色对话框时重置
+    allotClose() {
+      this.selectRolesId = ''
+      this.userInfo = []
     }
   }
 }
