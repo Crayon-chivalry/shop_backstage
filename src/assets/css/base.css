@@ -8,3 +8,7 @@ html,body,#app{
 .el-breadcrumb {
   margin-bottom: 15px;
 }
+
+.el-cascader-panel {
+  height: 300px;
+}
