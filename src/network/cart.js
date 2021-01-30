@@ -42,3 +42,14 @@ export function deleteCate(id) {
     url: '/categories/' + id
   })
 }
+
+
+//分类动态参数
+export function getCateMany(id,type) {
+  return request({
+    url: `/categories/${id}/attributes`,
+    params:{
+      sel: type
+    }
+  })
+}
